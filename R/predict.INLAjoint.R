@@ -500,7 +500,7 @@ predict.INLAjoint <- function(object, newData=NULL, newDataSurv=NULL, timePoints
               if(!is.null(newDataSurv) & as.character(object$SurvInfo[[1]]$nameTimeSurv) %in% colnames(newDataSurv)){
                 mTS <- newDataSurv[, as.character(object$SurvInfo[[1]]$nameTimeSurv)]
               }else if(object$timeVar %in% colnames(ND)){
-                mTS <- ND[!duplicated(ND$id, fromLast = T), object$timeVar]
+                mTS <- ND[!duplicated(ND[, id], fromLast = T), object$timeVar]
               }else{
                 mTS <- 0
               }
