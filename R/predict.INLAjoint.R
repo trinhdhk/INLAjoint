@@ -2013,13 +2013,16 @@ predict.INLAjoint <- function(object, newData=NULL, newDataSurv=NULL, timePoints
           }
           SurvSamp <- rbind(SurvSamp, SurvSampAdd, SurvSamp2)
         }
+
         if (return.samples){
+          NCol <- ncol(SurvSamp)
           if(dim(SurvSamp)[1] != dim(newPredS)[1]){
             addF <- matrix(1, ncol=NCol, nrow=dim(newPredS)[1]-dim(SurvSamp)[1])
-            SurvSampF <- rbind(addF, t(SurvSamp))
+            SurvSampF <- rbind(addF, SurvSamp)
           }else{
-            SurvSampF <- t(SurvSamp)
+            SurvSampF <- SurvSamp
           }
+
           colnames(SurvSampF) <- paste0('SurvSample_', 1:NCol)
         } else {
           if(dim(SurvSamp)[1] != dim(newPredS)[1]){
@@ -2055,11 +2058,12 @@ predict.INLAjoint <- function(object, newData=NULL, newDataSurv=NULL, timePoints
           }
           CIF_Samp_ <- rbind(CIF_Samp_, CIFSampAdd, CIFSamp_2)
           if (return.samples){
+            NCol <- ncol(CIF_Samp_)
             if(dim(SurvSamp)[1] != dim(newPredS)[1]){
               addF <- matrix(0, ncol=NCol, nrow=dim(newPredS)[1]-dim(CIF_Samp_)[1])
-              CIFSampF <- rbind(addF, t(CIF_Samp_))
+              CIFSampF <- rbind(addF, CIF_Samp_)
             }else{
-              CIFSampF <- t(CIF_Samp_)
+              CIFSampF <- CIF_Samp_
             }
             colnames(CIFSampF) <- paste0('CIFSample_', 1:NCol)
           } else {
