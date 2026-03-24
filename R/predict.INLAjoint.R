@@ -2045,17 +2045,35 @@ predict.INLAjoint <- function(object, newData=NULL, newDataSurv=NULL, timePoints
           }
           SurvSamp <- rbind(SurvSamp, SurvSampAdd, SurvSamp2)
         }
+
         if(length(which(is.nan(SurvSamp[1,])))>0){
-          SurvSamp <- SurvSamp[, -which(is.nan(SurvSamp[1,]))]
+            SurvSamp <- SurvSamp[, -which(is.nan(SurvSamp[1,]))]
         }
-        if(dim(SurvSamp)[1] != dim(newPredS)[1]){
-          addF <- matrix(1, ncol=5, nrow=dim(newPredS)[1]-dim(SurvSamp)[1])
-          SurvSampF <- rbind(addF, t(apply(SurvSamp, 1, SumStats)))
-        }else{
-          SurvSampF <- t(apply(SurvSamp, 1, SumStats))
+                                    
+        # Add new code to return samples for survival prediction
+        if (return.samples){
+          
+          NCol <- ncol(SurvSamp)
+          if(dim(SurvSamp)[1] != dim(newPredS)[1]){
+            addF <- matrix(1, ncol=NCol, nrow=dim(newPredS)[1]-dim(SurvSamp)[1])
+            SurvSampF <- rbind(addF, SurvSamp)
+          }else{
+            SurvSampF <- SurvSamp
+          }
+
+          colnames(SurvSampF) <- paste0('SurvSample_', 1:NCol)
+        } else {
+          if(dim(SurvSamp)[1] != dim(newPredS)[1]){
+            addF <- matrix(1, ncol=5, nrow=dim(newPredS)[1]-dim(SurvSamp)[1])
+            SurvSampF <- rbind(addF, t(apply(SurvSamp, 1, SumStats)))
+          }else{
+            SurvSampF <- t(apply(SurvSamp, 1, SumStats))
+          }
+          colnames(SurvSampF) <- c("Surv_Mean", "Surv_Sd", "Surv_quant0.025", "Surv_quant0.5", "Surv_quant0.975")
         }
+
         newPredS <- cbind(newPredS, SurvSampF)
-        colnames(newPredS)[(length(colnames(newPredS))-4):length(colnames(newPredS))] <- c("Surv_Mean", "Surv_Sd", "Surv_quant0.025", "Surv_quant0.5", "Surv_quant0.975")
+        # colnames(newPredS)[(length(colnames(newPredS))-4):length(colnames(newPredS))] <- c("Surv_Mean", "Surv_Sd", "Surv_quant0.025", "Surv_quant0.5", "Surv_quant0.975")
       }
       if(CIF){
         CIFSamp <- vector("list", M)
@@ -2077,15 +2095,28 @@ predict.INLAjoint <- function(object, newData=NULL, newDataSurv=NULL, timePoints
             CIFSampAdd <- NULL
           }
           CIF_Samp_ <- rbind(CIF_Samp_, CIFSampAdd, CIFSamp_2)
-          if(dim(CIF_Samp_)[1] != dim(newPredS)[1]){
-            addF <- matrix(0, ncol=5, nrow=dim(newPredS)[1]-dim(CIF_Samp_)[1])
-            CIFSampF <- rbind(addF, t(apply(CIF_Samp_, 1, SumStats)))
-          }else{
-            CIFSampF <- t(apply(CIF_Samp_, 1, SumStats))
+          if (return.samples){
+            NCol <- ncol(CIF_Samp_)
+            if(dim(SurvSamp)[1] != dim(newPredS)[1]){
+              addF <- matrix(0, ncol=NCol, nrow=dim(newPredS)[1]-dim(CIF_Samp_)[1])
+              CIFSampF <- rbind(addF, CIF_Samp_)
+            }else{
+              CIFSampF <- CIF_Samp_
+            }
+            colnames(CIFSampF) <- paste0('CIFSample_', 1:NCol)
+          } else {
+            if(dim(CIF_Samp_)[1] != dim(newPredS)[1]){
+              addF <- matrix(0, ncol=5, nrow=dim(newPredS)[1]-dim(CIF_Samp_)[1])
+              CIFSampF <- rbind(addF, t(apply(CIF_Samp_, 1, SumStats)))
+            }else{
+              CIFSampF <- t(apply(CIF_Samp_, 1, SumStats))
+            }
+            colnames(CIFSampF) <- c("CIF_Mean", "CIF_Sd", "CIF_quant0.025", "CIF_quant0.5", "CIF_quant0.975")
           }
+
         }
         newPredS <- cbind(newPredS, CIFSampF)
-        colnames(newPredS)[(length(colnames(newPredS))-4):length(colnames(newPredS))] <- c("CIF_Mean", "CIF_Sd", "CIF_quant0.025", "CIF_quant0.5", "CIF_quant0.975")
+        # colnames(newPredS)[(length(colnames(newPredS))-4):length(colnames(newPredS))] <- c("CIF_Mean", "CIF_Sd", "CIF_quant0.025", "CIF_quant0.5", "CIF_quant0.975")
       }
       predS <- rbind(predS, newPredS)
     }
